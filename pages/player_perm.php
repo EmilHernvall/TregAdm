@@ -14,12 +14,12 @@ $player = $stmt->fetch();
 
 $stmt->closeCursor();
 
-$stmt = $conn->prepare("SELECT * FROM player_property WHERE player_id = ?");
-$stmt->execute(array($_GET["id"]));
+$stmt = $conn->prepare("SELECT * FROM player_property WHERE player_id = ? AND NOT property_key = ?");
+$stmt->execute(array($_GET["id"], "keyword"));
 
 $rawSettings = $stmt->fetchAll();
 foreach ($rawSettings as $setting) {
-    $settings[$setting["property_key"]] = $setting["property_value"];
+    $psettings[$setting["property_key"]] = $setting["property_value"];
 }
 
 $sql  = "SELECT player_id, player_name, property_value FROM player_property ";
@@ -42,11 +42,16 @@ $title = "Permissions: " . $player["player_name"];
 
 $context = array();
 $context["player"] = $player;
-$context["settings"] = $settings;
+$context["psettings"] = $psettings;
 $context["guardians"] = $guardians;
 $context["permissionList"] = $permissionList;
 $context["maxRank"] = $maxRank;
 $context["flags"] = $flags;
+if(array_key_exists($_POST['keywordRemoved'])){
+  $context["keywordRemoved"] = true;
+}else{
+  $context["keywordRemoved"] = 0;
+}
 
 $styles = array();
 $scripts = array("/js/player_perm.js");
